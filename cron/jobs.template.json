@@ -1,0 +1,107 @@
+{
+  "version": 1,
+  "note": "Template only. Create fresh jobs in the target environment rather than copying IDs or state.",
+  "jobs": [
+    {
+      "name": "Executive assistant sweep",
+      "enabled": true,
+      "schedule": {
+        "kind": "cron",
+        "expr": "*/15 8-21 * * *",
+        "tz": "{{TIMEZONE}}"
+      },
+      "sessionTarget": "main",
+      "wakeMode": "now",
+      "payload": {
+        "kind": "systemEvent",
+        "text": "Executive assistant sweep. Use the executive-assistant skill."
+      }
+    },
+    {
+      "name": "Daily task prep",
+      "enabled": true,
+      "schedule": {
+        "kind": "cron",
+        "expr": "0 2 * * *",
+        "tz": "{{TIMEZONE}}"
+      },
+      "sessionTarget": "isolated",
+      "wakeMode": "now",
+      "payload": {
+        "kind": "agentTurn",
+        "message": "Use the daily-task-prep skill.",
+        "model": "gpt",
+        "thinking": "medium",
+        "timeoutSeconds": 900
+      },
+      "delivery": {
+        "mode": "none"
+      }
+    },
+    {
+      "name": "Daily business-development sourcing",
+      "enabled": true,
+      "schedule": {
+        "kind": "cron",
+        "expr": "0 2 * * *",
+        "tz": "{{TIMEZONE}}"
+      },
+      "sessionTarget": "isolated",
+      "wakeMode": "now",
+      "payload": {
+        "kind": "agentTurn",
+        "message": "Use the business-development skill. Find 10 new leads that fit {{TARGET_MARKET}} in {{TARGET_GEOGRAPHY}} and are not already in the live outreach sheet. Verify a working website URL plus a LinkedIn URL for each before adding them. Check the website for a real public email address before leaving the Email column blank. Add them to the live sheet for founder review only. Do not contact them.",
+        "model": "gpt",
+        "thinking": "medium",
+        "timeoutSeconds": 1800
+      },
+      "delivery": {
+        "mode": "announce",
+        "channel": "{{PRIMARY_UPDATE_CHANNEL}}",
+        "to": "{{PRIMARY_UPDATE_TARGET}}"
+      }
+    },
+    {
+      "name": "Nightly OpenClaw backup",
+      "enabled": false,
+      "schedule": {
+        "kind": "cron",
+        "expr": "0 3 * * *",
+        "tz": "{{TIMEZONE}}"
+      },
+      "sessionTarget": "isolated",
+      "wakeMode": "now",
+      "payload": {
+        "kind": "agentTurn",
+        "message": "In {{REPO_ROOT}}, perform the nightly backup to the configured Git repo. Stage only the restore-critical allowlisted paths you actually want backed up. Do not add secrets, runtime state, logs, media, browser state, backup files, or ignored paths. If there are no staged changes, do nothing and stay silent. If there are changes, commit and push them. If push fails or something needs human attention, send a short proactive update.",
+        "model": "gpt",
+        "thinking": "medium",
+        "timeoutSeconds": 900
+      },
+      "delivery": {
+        "mode": "none"
+      }
+    },
+    {
+      "name": "Optional OpenClaw self-update",
+      "enabled": false,
+      "schedule": {
+        "kind": "cron",
+        "expr": "0 2 * * *",
+        "tz": "{{TIMEZONE}}"
+      },
+      "sessionTarget": "isolated",
+      "wakeMode": "now",
+      "payload": {
+        "kind": "agentTurn",
+        "message": "Check whether an OpenClaw update is available. If there is an update, install it using the gateway update tool. If there is no update, do nothing. Keep this run silent unless there is a meaningful problem that needs human attention.",
+        "model": "gpt",
+        "thinking": "medium",
+        "timeoutSeconds": 900
+      },
+      "delivery": {
+        "mode": "none"
+      }
+    }
+  ]
+}
