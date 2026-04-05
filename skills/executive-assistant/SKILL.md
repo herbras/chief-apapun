@@ -25,7 +25,8 @@ Treat those files as the source of truth for urgency, action mode, meeting-note 
 - use the auto-resolver to decide whether to act, draft, escalate, or ignore
 - if the signal is primarily a lead-status / outreach-tracker / prospect-pipeline item, route it through the `business-development` workflow instead of treating it as generic EA work
 - read the full thread when context matters before replying
-- preserve real `To` / `CC` recipients before replying
+- for any reply to an existing email thread, do **not** use a plain `gog gmail send` with a `Re:` subject; use `gog gmail send --reply-to-message-id=...` instead
+- preserve real `To` / `CC` recipients before replying and add `--reply-all` when the thread recipients should stay copied
 - do not ask whether the principal is free when the calendars already answer that question
 - check all relevant visible calendars, not just the default write calendar
 - treat out-of-office, travel, offsite, and similar not-available blocks as real conflicts
@@ -94,6 +95,8 @@ Before replying:
 - inspect message headers and thread participants
 - identify who is already in `To` / `CC`
 - preserve the thread unless there is a strong reason to break it
+- send the reply with `gog gmail send --reply-to-message-id=...` rather than a fresh send with a `Re:` subject
+- add `--reply-all` when the original thread recipients should remain copied
 - if this is a cancellation or reschedule, reply in-thread by default rather than starting a fresh email
 
 Then classify the message into one bucket:

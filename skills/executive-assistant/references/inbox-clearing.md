@@ -6,6 +6,8 @@ Use this file as a quick reminder of the default inbox posture.
 
 - use Gmail *message search*, not thread-only search
 - sweep sent mail so unanswered outbound threads do not disappear
+- for any reply to an existing thread, use `gog gmail send --reply-to-message-id=...` instead of a fresh send with `Re:` in the subject
+- add `--reply-all` when the thread recipients should stay copied
 - do not leave actionable email in a reviewed batch without one of these outcomes:
   - handled
   - acknowledged with next step
