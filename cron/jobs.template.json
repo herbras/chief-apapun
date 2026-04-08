@@ -10,28 +10,11 @@
         "expr": "*/15 8-21 * * *",
         "tz": "{{TIMEZONE}}"
       },
-      "sessionTarget": "main",
-      "wakeMode": "now",
-      "payload": {
-        "kind": "systemEvent",
-        "text": "Executive assistant sweep. Use the executive-assistant skill. Handle this reminder internally and only message the principal if there is new actionable information."
-      }
-    },
-    {
-      "name": "Daily task prep",
-      "enabled": true,
-      "schedule": {
-        "kind": "cron",
-        "expr": "0 2 * * *",
-        "tz": "{{TIMEZONE}}"
-      },
       "sessionTarget": "isolated",
       "wakeMode": "now",
       "payload": {
         "kind": "agentTurn",
-        "message": "Use the daily-task-prep skill.",
-        "model": "gpt",
-        "thinking": "medium",
+        "message": "Executive assistant sweep. Use the existing executive-assistant skill. This cron is the dependable trigger for recurring EA work. Rely on the existing skill for the detailed sweep procedure. If the sweep finds partner / referral / prospect work, also apply the existing business-development skill. Keep the run bounded and deterministic.",
         "timeoutSeconds": 900
       },
       "delivery": {
@@ -39,7 +22,7 @@
       }
     },
     {
-      "name": "Daily business-development sourcing",
+      "name": "Untangle daily prospecting",
       "enabled": true,
       "schedule": {
         "kind": "cron",
@@ -50,15 +33,32 @@
       "wakeMode": "now",
       "payload": {
         "kind": "agentTurn",
-        "message": "Use the business-development skill. Run the default daily prospecting batch.",
+        "message": "Run the default CT prospecting batch. Use the existing business-development skill. This cron is the dependable trigger for the recurring BD batch. Rely on the existing skill for the detailed procedure. Keep the run bounded and deterministic.",
         "model": "gpt",
         "thinking": "medium",
         "timeoutSeconds": 1800
       },
       "delivery": {
-        "mode": "announce",
-        "channel": "{{PRIMARY_UPDATE_CHANNEL}}",
-        "to": "{{PRIMARY_UPDATE_TARGET}}"
+        "mode": "none"
+      }
+    },
+    {
+      "name": "Daily task prep",
+      "enabled": true,
+      "schedule": {
+        "kind": "cron",
+        "expr": "0 4 * * 1-5",
+        "tz": "{{TIMEZONE}}"
+      },
+      "sessionTarget": "isolated",
+      "wakeMode": "now",
+      "payload": {
+        "kind": "agentTurn",
+        "message": "Prepare today's tasks in Todoist only. Use the existing daily-task-prep skill. This cron is the dependable trigger for morning task curation. Rely on the existing skill for the detailed procedure. Keep the run bounded and deterministic.",
+        "timeoutSeconds": 900
+      },
+      "delivery": {
+        "mode": "none"
       }
     },
     {
@@ -69,11 +69,15 @@
         "expr": "30 7 * * *",
         "tz": "{{TIMEZONE}}"
       },
-      "sessionTarget": "main",
+      "sessionTarget": "isolated",
       "wakeMode": "now",
       "payload": {
-        "kind": "systemEvent",
-        "text": "Executive assistant sweep. Use the executive-assistant skill. This optional boundary job is useful when your desired sweep window cannot be expressed cleanly in one cron expression."
+        "kind": "agentTurn",
+        "message": "Executive assistant sweep. Use the existing executive-assistant skill. This optional boundary job is useful when your desired sweep window cannot be expressed cleanly in one cron expression.",
+        "timeoutSeconds": 900
+      },
+      "delivery": {
+        "mode": "none"
       }
     },
     {

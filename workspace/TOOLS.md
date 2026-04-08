@@ -1,14 +1,23 @@
 # TOOLS.md - Local Notes
 
-Use this file for environment-specific details that should *not* live in public skills.
+Skills define how workflows should operate. This file is for your machine-specific setup.
 
-Examples:
-- real inboxes and calendars to check
-- tracker / CRM notes
-- browser profile preferences
-- business-development target segments
-- voice, device, or camera names
-- local SSH aliases
+## What goes here
+
+Use this file for things like:
+
+- Google account / profile notes
+- browser profile choices
+- camera names and locations
+- SSH hosts and aliases
+- device nicknames
+- room names
+- local auth state
+
+## Clawchief boundary
+
+- Keep workflow policy in `skills/` and `clawchief/*.md`.
+- Keep `TOOLS.md` for local environment notes, account details, auth state, browser/profile choices, and machine-specific setup.
 
 ## Communication defaults
 
@@ -20,38 +29,50 @@ Examples:
 - Time zone: `{{TIMEZONE}}`
 - Primary proactive update route: `{{PRIMARY_UPDATE_CHANNEL}} -> {{PRIMARY_UPDATE_TARGET}}`
 
+## `gws` profile notes
+
+Document the profile directories, credential files, and account mappings your helper scripts should use.
+
+Example:
+
+- assistant profile config dir: `~/.config/gws-r2`
+- principal profile config dir: `~/.config/gws-owner`
+- credential files, if you pin them explicitly
+- any account-specific calendar write restrictions or read-only calendars
+
+## Todoist
+
+- canonical project name: `Clawchief`
+- token source: environment variable or `~/.openclaw/.env`
+- document any local conventions or owner aliases you want to preserve
+
 ## Calendars to check
 
 List the calendars that should be treated as real availability constraints.
 
 Example:
+
 - `{{PRIMARY_WORK_EMAIL}}`
 - `{{PERSONAL_EMAIL}}`
-- `{{SECONDARY_CALENDAR_EMAIL_1}}`
-- Family calendar (conflict source only unless explicitly desired)
+- additional work calendars
+- Family calendar or equivalent hard-conflict calendar
 
 ## Outreach tracker
 
-- Live tracker / sheet id: `{{GOOGLE_SHEET_ID}}`
-- Treat this as the source of truth for outreach state.
-- Document the current expected columns here if your sheet is customized.
+- live tracker / sheet id: `{{GOOGLE_SHEET_ID}}`
+- treat this as the source of truth for outreach / CRM state
+- document the current expected columns here if your sheet is customized
 
 ## Business-development playbook
 
 Document your default sourcing motion here.
 
-Example knobs to define:
+Suggested knobs:
+
 - target geography
 - primary target segment
 - optional secondary target segment
 - default daily batch size
 - verification requirements
-- default outreach tone
 - follow-up cadence overrides
-
-Example:
-- Geography: `{{TARGET_GEOGRAPHY}}`
-- Primary segment: `{{TARGET_MARKET}}`
-- Secondary segment: optional custom segment
-- Daily new leads: 10
-- Verify working website + real email before adding
+- any outreach tone or compliance rules unique to your environment

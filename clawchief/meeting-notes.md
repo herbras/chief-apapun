@@ -1,38 +1,52 @@
 # Meeting Notes Ingestion
 
-Status: template v1
-Purpose: make AI-generated or shared meeting notes part of the always-on chief-of-staff loop so that decisions, tasks, follow-ups, and auto-resolve opportunities do not die in documents.
+Status: v1
+Created: 2026-04-03
+Purpose: make Gemini-generated meeting notes part of the always-on chief-of-staff loop so that decisions, tasks, follow-ups, and auto-resolve opportunities do not die in meeting docs.
 
 ## Source
 
-Treat meeting notes as a live operational signal source.
+Ryan wants `r2@untangle.us` invited to all Ryan meetings by default so Gemini meeting notes are shared to that account.
 
-These notes might come from:
-- Google Docs shared to the assistant account
-- docs created by an AI notetaker
-- exported meeting summaries
-- transcripts stored in a known folder
+When creating, updating, or rescheduling a Ryan meeting, preserve or add `r2@untangle.us` as an attendee unless Ryan explicitly says otherwise.
 
-Customize the exact source for your environment.
+Treat those notes as a live operational signal source.
 
 ## Canonical state files
 
-- Policy: `clawchief/meeting-notes.md`
-- Processed-doc ledger: `workspace/memory/meeting-notes-state.json`
-- Task sink: `clawchief/tasks.md`
-- Priority / urgency: `clawchief/priority-map.md`
-- Auto-resolution policy: `clawchief/auto-resolver.md`
+- Policy: `~/.openclaw/workspace/clawchief/meeting-notes.md`
+- Processed-doc ledger: `~/.openclaw/workspace/memory/meeting-notes-state.json`
+- Task sink: Todoist
+- Priority / urgency: `~/.openclaw/workspace/clawchief/priority-map.md`
+- Auto-resolution policy: `~/.openclaw/workspace/clawchief/auto-resolver.md`
+
+## Ownership boundary
+
+This file owns:
+- the meeting-note ingestion contract
+- success criteria for considering a note handled
+- the ledger requirement that prevents repeated processing
+
+This file does not own:
+- general inbox triage
+- general task-system schema
+- broad priority policy
+- cron implementation details beyond which trigger is canonical
 
 ## Core rule
 
-Every recurring executive-assistant sweep and every heartbeat should check for newly shared or recently updated meeting notes that have not yet been processed.
+The recurring executive-assistant sweep cron is the canonical dependable trigger for meeting-note ingestion.
+
+Heartbeat-driven EA runs may also check for notes when they are already touching the same operational surface, but reliability must not depend on heartbeats.
+
+The scheduling side and the ingestion side are linked: if R2 is not on the meeting, the meeting-notes pipeline is more likely to break. Default to keeping `r2@untangle.us` on Ryan meetings.
 
 If a note is new and relevant:
 - read it
 - extract decisions, commitments, open questions, and action items
-- add principal tasks to `clawchief/tasks.md`
-- add assistant tasks to `clawchief/tasks.md` or auto-resolve them when allowed
-- update the relevant live source of truth (calendar, tracker, CRM, inbox, docs, etc.)
+- add Ryan tasks to Todoist
+- add R2 tasks to Todoist or auto-resolve them when allowed
+- update the relevant live source of truth (calendar, outreach sheet / CRM, etc.)
 - record the note as processed in the meeting-notes ledger
 
 ## What counts as successful ingestion
@@ -40,65 +54,41 @@ If a note is new and relevant:
 A meeting note is not "handled" just because it was read.
 
 It is only handled when the important outputs have been pushed into the system:
-- tasks added or updated
+- Todoist tasks added or updated
 - follow-ups created
-- tracker / calendar / inbox state updated when appropriate
+- tracker / CRM row, calendar, and inbox state updated when appropriate
 - auto-resolved actions completed when safe
 - processed-doc ledger updated
 
-## Processing workflow
+## Processing rule
 
-1. search the configured source for recently shared or recently updated meeting notes
-2. compare candidate docs against `workspace/memory/meeting-notes-state.json`
-3. for each unprocessed note:
-   - read the note text
-   - identify:
-     - principal action items
-     - assistant action items
-     - follow-ups waiting on others
-     - decisions / commitments
-     - items that can be auto-resolved right now
-4. classify each extracted item through the priority map
-5. run the auto-resolver policy
-6. update `clawchief/tasks.md` and any other live source of truth in the same turn
-7. record the note as processed with timestamp and a short summary of what was extracted / done
+The `executive-assistant` skill owns the detailed ingestion workflow.
 
-## What to extract from notes
+This file defines the contract:
+- check for new meeting notes during the recurring EA sweep, and optionally during other EA runs when practical
+- turn notes into source-of-truth updates, not just summaries
+- update Todoist, the outreach tracker, calendar/inbox state, and `memory/meeting-notes-state.json` as needed
 
-Look specifically for:
-- explicit action items
-- implied follow-ups
-- deadlines
-- promises the principal made
-- introductions to send
-- docs / links / materials to share
+## Extraction rule
+
+The skill should extract whatever changes live operating state:
+- tasks
+- follow-ups
+- decisions
+- commitments
 - scheduling next steps
 - outreach / partnership next steps
-- GTM / content tasks
-- legal / policy questions that need review
-- anything that should become a task, reminder, draft, or auto-resolve action
+- legal or policy blockers needing Ryan or Linda
 
-## Auto-resolve bias for meeting notes
+## Auto-resolution rule
 
-Meeting notes often contain operational follow-ups that should be auto-resolved when safe.
+Use `clawchief/auto-resolver.md` for action-mode decisions.
 
-Good auto-resolve examples:
-- add tasks for the principal or assistant
-- create a follow-up reminder
-- update a tracker after a partner / prospect meeting
-- draft or send a low-risk scheduling follow-up when authority is clear
-- update calendar / task state based on what was agreed
-- send the principal a short summary of what was turned into action
-
-Draft-first or escalate examples:
-- sensitive legal / policy wording
-- investor or board positioning
-- emotionally sensitive follow-up language
-- unclear commitments where the notes are ambiguous
+Use structured plans or sub-agents only when they help the skill complete a larger ingestion batch, but keep final authority in the canonical source-of-truth updates.
 
 ## Ledger format
 
-Use `workspace/memory/meeting-notes-state.json` to avoid reprocessing the same doc repeatedly.
+Use `~/.openclaw/workspace/memory/meeting-notes-state.json` to avoid reprocessing the same doc repeatedly.
 
 Each processed record should include, when known:
 - `docId`
@@ -108,12 +98,14 @@ Each processed record should include, when known:
 - `status`
 - `summary`
 
-## Frequency expectation
+## Trigger rule
 
-This is not a once-a-day batch.
+Primary trigger:
+- the executive-assistant sweep cron in `~/.openclaw/cron/jobs.json`
 
-The intended behavior is:
-- executive-assistant sweep keeps checking
-- heartbeat reinforces the same behavior
-- low-risk actions get resolved automatically
-- the principal only sees what matters or what still needs them
+Secondary / opportunistic triggers:
+- heartbeat-driven EA runs
+- direct user asks that touch meeting follow-up or inbox/calendar cleanup
+
+Rule:
+- if cron coverage is healthy, meeting-note ingestion should still happen reliably even when no heartbeat fires
